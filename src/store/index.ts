@@ -5,6 +5,23 @@ export interface StoreAction extends Action {
   payload?: any
 }
 
+export interface User {
+  id: number
+  name: string
+  email: string
+}
+export interface Post {
+  id: number
+  title: string
+  body: string
+}
+export interface DefaultRootState {
+  users: User[]
+  posts: Post[]
+  loading: boolean
+  error: any
+}
+
 export const ACTIIONS = {
   SET_STATE: 'SET_STATE',
   SET_LOADING: 'SET_LOADING',
@@ -12,7 +29,7 @@ export const ACTIIONS = {
   RESET: 'RESET',
 }
 
-const initialState = {
+const initialState: DefaultRootState = {
   users: [],
   posts: [],
   loading: false,

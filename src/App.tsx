@@ -1,8 +1,10 @@
 import React from 'react'
 import { Provider } from 'react-redux'
+import ReactLoading from 'react-loading'
 
 import store from './store'
 import UseFetch, { useFetch } from './helpers/useFetch'
+import { Users, Posts } from 'components'
 
 UseFetch.configure(config => {
   config.baseUrl = 'https://jsonplaceholder.typicode.com'
@@ -25,17 +27,9 @@ function App() {
   return (
     <Provider store={store}>
       <div className="App">
-        <header className="App-header">
-          <p>Loading {`${isLoading}`}</p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        {isLoading && <ReactLoading type={'bars'} color="grey" />}
+        <Users />
+        <Posts />
       </div>
     </Provider>
   )
