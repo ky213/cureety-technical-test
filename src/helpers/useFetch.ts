@@ -25,14 +25,15 @@ export default class UseFetch {
 export const compressData = (rawData: string) =>
   new Promise<string>((resolve, reject) => {
     try {
-      //if compression take longer than 200ms we save raw data
+      //if compression takes longer than 200ms return raw data
+
       setTimeout(() => {
         resolve(rawData)
       }, 200)
 
       const compressedData = LZString.compress(rawData)
 
-      resolve(compressedData)
+      resolve('compressed' + compressedData)
     } catch (error) {
       reject('compression error: ' + error.message)
     }
@@ -47,7 +48,22 @@ export const saveDataToLocalStorage = async (data: string) => {
   }
 }
 
-const useFetch = (callback: Function): [any, boolean] => {
+export const readDataFromLocalStorage = () => {
+  const storageData = localStorage.getItem('myData')
+  let rawData
+
+  if (storageData) {
+    if (storageData.startsWith('compressed'))
+      rawData = JSON.parse(
+        LZString.decompress(storageData.replace('compressed', ''))
+      )
+    else rawData = JSON.parse(storageData)
+  }
+
+  return rawData
+}
+
+export const useFetch = (callback: Function): [any, boolean] => {
   const [state, setState] = useState<{ [x: string]: any; loading: boolean }>({
     loading: false,
   })
@@ -63,6 +79,14 @@ const useFetch = (callback: Function): [any, boolean] => {
   let dataAccumulator = {}
 
   useEffect(() => {
+    // get stale  data first
+    const storageData = readDataFromLocalStorage()
+
+    if (storageData)
+      store.dispatch({ type: ACTIIONS.SET_STATE, payload: storageData })
+
+    //start loading fresh data
+
     setState({ loading: true })
     store.dispatch({ type: ACTIIONS.SET_LOADING, payload: true })
 
@@ -74,7 +98,7 @@ const useFetch = (callback: Function): [any, boolean] => {
 
         dataAccumulator = { ...dataAccumulator, [entity]: data }
 
-        //only if we reach the last request
+        //on last request
         if (index === entities.length - 1) {
           saveDataToLocalStorage(JSON.stringify(dataAccumulator))
           setState({ ...dataAccumulator, loading: false })
@@ -95,5 +119,3 @@ const useFetch = (callback: Function): [any, boolean] => {
 
   return [state, state.loading]
 }
-
-export { useFetch }
