@@ -2,19 +2,31 @@ import React from 'react'
 import { Provider } from 'react-redux'
 
 import store from './store'
+import UseFetch, { useFetch } from './helpers/useFetch'
 
-import logo from './logo.svg'
-import './App.css'
+UseFetch.configure(config => {
+  config.baseUrl = 'https://jsonplaceholder.typicode.com'
+  config.authentificationHeader = () => {
+    return {
+      Authorization: localStorage.getItem('id_token'),
+    }
+  }
+  config.compressionTimeoutDelay = 200
+  config.maximumSize = 2 * 1024 * 1024 // 2Mb.
+  config.protectedFromCleaning = ['profile', /^patients\/importants/]
+})
 
 function App() {
+  const [{ users, posts }, isLoading] = useFetch((fetch: Function) => ({
+    users: fetch('/users'),
+    posts: fetch('/posts', { queryParams: { order: 'label ASC' } }),
+  }))
+
   return (
     <Provider store={store}>
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
+          <p>Loading {`${isLoading}`}</p>
           <a
             className="App-link"
             href="https://reactjs.org"

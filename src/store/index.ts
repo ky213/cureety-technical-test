@@ -6,9 +6,9 @@ export interface StoreAction extends Action {
 }
 
 export const ACTIIONS = {
-  SET_USERS: 'SET_USERS',
-  SET_POSTS: 'SET_POSTS',
+  SET_STATE: 'SET_STATE',
   SET_LOADING: 'SET_LOADING',
+  SET_ERROR: 'SET_ERROR',
   RESET: 'RESET',
 }
 
@@ -21,14 +21,14 @@ const initialState = {
 
 const reducer = (state = initialState, { type, payload }: StoreAction) => {
   switch (type) {
-    case ACTIIONS.SET_USERS:
-      return { ...state, loading: false, users: payload }
-    case ACTIIONS.SET_POSTS:
-      return { ...state, loading: false, posts: payload }
+    case ACTIIONS.SET_STATE:
+      return { ...state, ...payload, error: null }
     case ACTIIONS.SET_LOADING:
       return { ...state, loading: payload }
+    case ACTIIONS.SET_ERROR:
+      return { ...state, loading: false, error: payload }
     case ACTIIONS.RESET:
-      return state
+      return initialState
     default:
       return state
   }
