@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import LZString from 'lz-string'
+
 import store, { ACTIIONS } from 'store'
 
 export default class UseFetch {
@@ -17,6 +19,31 @@ export default class UseFetch {
 
   static configure(setConfig) {
     setConfig(UseFetch.config)
+  }
+}
+
+export const compressData = (rawData: string) =>
+  new Promise<string>((resolve, reject) => {
+    try {
+      //if compression take longer than 200ms we save raw data
+      setTimeout(() => {
+        resolve(rawData)
+      }, 200)
+
+      const compressedData = LZString.compress(rawData)
+
+      resolve(compressedData)
+    } catch (error) {
+      reject('compression error: ' + error.message)
+    }
+  })
+
+export const saveDataToLocalStorage = async (data: string) => {
+  try {
+    const finalData = await compressData(data)
+    localStorage.setItem('myData', finalData)
+  } catch (error) {
+    console.log('error saving data to local storage: ', error.message)
   }
 }
 
@@ -49,6 +76,7 @@ const useFetch = (callback: Function): [any, boolean] => {
 
         //only if we reach the last request
         if (index === entities.length - 1) {
+          saveDataToLocalStorage(JSON.stringify(dataAccumulator))
           setState({ ...dataAccumulator, loading: false })
           store.dispatch({
             type: ACTIIONS.SET_STATE,
